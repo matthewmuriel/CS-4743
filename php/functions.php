@@ -501,4 +501,18 @@ function logCron($job_name, $time_start, $time_end, $execution_time, $status){
     }
 }
 
+function redirect($uri)
+{?>
+        <script type"text/javascript">
+        <!--
+        document.location.href="<?php echo $uri; ?>";
+        -->
+        </script>
+<?php die;   
+}
+
+function isValidLoanNumber($loanNumber) {
+    return preg_match('/^\d{1,9}$/', $loanNumber) === 1;
+}
+
 ?>
