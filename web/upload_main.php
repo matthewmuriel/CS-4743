@@ -21,6 +21,13 @@
 <body>
 <?php
 echo '<div id ="page-inner">';
+
+if (isset($_GET['success'])){
+   if ($_GET['success']=="FileUploaded"){
+      echo '<div class="alert alert-success" role="alert">File Successfully Uploaded!</div>';
+   }
+}
+
 echo '<h1 class="page-head-line">Select the type of Upload</h1>';
 echo '<div class="panel-body">';
 echo '<p><a class="btn btn-primary" href="upload_new.php">Upload New Loan</a></p>';

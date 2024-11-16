@@ -2,14 +2,14 @@
 include("functions.php");
 
 try{
-    $loanIds = fetchLoanIDsFromDatabase();
-    echo"<pre>";
-    
-    foreach($loanIds as $loanId){
-        echo "".$loanId['loan_id']."/n";
-    }
+    $loanId = 002346187;
+    $document_type = "Personals";
+    $highestloanNumber = getHighestDocumentVersion($loanId, $document_type);
 
+    echo "<pre>";
+    echo "$highestloanNumber";
     echo "</pre>";
+
 } catch (Exception $e) {
     clearSID();
     echo "". $e->getMessage() ."";

@@ -43,7 +43,7 @@ function db_connect($db){
 function fetchLoanIDsFromDatabase(){
     try {
         $pdo = db_connect('doc_storage');
-        $stmt = $pdo->query("Select loan_id, loan_number from Loan");
+        $stmt = $pdo->query("Select loan_id, loan_number from Loan ORDER BY loan_number ASC");
         $loanIDs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return $loanIDs;
@@ -113,7 +113,7 @@ function insertLoanID($loanID){
 
         logMessage("Inserted loan id $loanID into database.", "INFO");
     } catch (PDOException $e) {
-        logMessage("Error inserting {$loanID} into database: " . $e->getMessage());
+        logMessage("Error inserting {$loanID} into database: " . $e->getMessage(), "ERROR");
         error_log("Error inserting loan id into database: " . $e->getMessage());
     }
 }
@@ -135,7 +135,7 @@ function insertImportData($fileName, $fileParts){
         logMessage('Inserted import data for ' . $fileName . ' into database.', "INFO");
     } catch (PDOException $e) {
         error_log("Error inserting import data into database: " . $e->getMessage());
-        logMessage("Error inserting import data into database: " . $e->getMessage());
+        logMessage("Error inserting import data into database: " . $e->getMessage(), "ERROR");
     }
 }
 
@@ -173,7 +173,7 @@ function checkDocumentName($document){
         return $stmt->fetchColumn() !== false;
     }catch (PDOException $e) {
         error_log("". $e->getMessage());
-        logMessage("". $e->getMessage());
+        logMessage("". $e->getMessage(), "ERROR");
     }
 }
 
@@ -236,7 +236,7 @@ function updateFileStatus($fileName, $status){
         logMessage("Updated file status for $fileName to $status", "INFO");
     }catch (PDOException $e){
         error_log("Error updating file status: " . $e->getMessage());
-        logMessage("Error updating file status: " . $e->getMessage());
+        logMessage("Error updating file status: " . $e->getMessage(), "ERROR");
     }
 }
 
@@ -513,6 +513,88 @@ function redirect($uri)
 
 function isValidLoanNumber($loanNumber) {
     return preg_match('/^\d{1,9}$/', $loanNumber) === 1;
+}
+
+function getHighestDocumentVersion($loanNumber, $documentName) {
+    try {
+        $pdo = db_connect('file_metadata');
+        $stmt = $pdo->prepare("SELECT MAX(version) AS max_version FROM file_imports WHERE loan_number = :loan_number AND document_type = :document_name");
+        
+        $stmt->execute([
+            ':loan_number' => $loanNumber,
+            ':document_name' => $documentName
+        ]);
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result ? $result['max_version'] : null;
+    } catch (PDOException $e) {
+        error_log("Error fetching highest document version: " . $e->getMessage());
+        return null;
+    }
+}
+
+function getDocumentNameById($documentId) {
+    try {
+        $pdo = db_connect('doc_storage');
+        $stmt = $pdo->prepare("SELECT document_name FROM Document WHERE document_id = :document_id");
+        
+        $stmt->execute([':document_id' => $documentId]);
+        
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return $result ? $result['document_name'] : null;
+    } catch (PDOException $e) {
+        error_log("Error fetching document name: " . $e->getMessage());
+        return null;
+    }
+}
+
+function getLoanNumberById($loanId) {
+    try {
+        $pdo = db_connect('doc_storage');
+        $stmt = $pdo->prepare("SELECT loan_number FROM Loan WHERE loan_id = :loan_id");
+        
+        $stmt->execute([':loan_id' => $loanId]);
+        
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return $result ? $result['loan_number'] : null;
+    } catch (PDOException $e) {
+        error_log("Error fetching loan number: " . $e->getMessage());
+        return null;
+    }
+}
+
+function saveUploadedFile($fileName){
+    $tempDirectory = "/var/private_files/files/temp_web/";
+    $tempFilePath = $tempDirectory . $fileName;
+
+    if (move_uploaded_file($_FILES['userfile']['tmp_name'], $tempFilePath)) {
+
+        return true;
+    } else {
+        return false;
+    }    
+}
+
+function insertFileMetadata($fileName, $loanNumber, $docType, $version, $now, $status ="Uploaded"){
+    try{
+        $pdo = db_connect("file_metadata");
+        $sql = "INSERT INTO file_imports (file_id, loan_number, document_type, version, status, created_at) VALUES (:file_id, :loan_id, :doc_type, :version, :status, NOW())";
+    
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':loan_id', $loanNumber);
+        $stmt->bindParam(':file_id', $fileName);
+        $stmt->bindParam(':doc_type', $docType);
+        $stmt->bindParam(':version', $version);
+        $stmt->bindParam(':status', $status); 
+        
+        $stmt->execute();
+    } catch (PDOException $e) {
+        error_log("Error inserting import data into database: " . $e->getMessage());
+        logMessage("Error inserting import data into database: " . $e->getMessage(), "ERROR");        
+    }
 }
 
 ?>

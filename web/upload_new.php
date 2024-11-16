@@ -89,7 +89,9 @@ if (isset($_POST['submit']) && $_POST['submit'] == 'submit') {
    $loanNumber=$_POST['loanNum'];
    $docId=$_POST['docType'];
    $fileUpload=$_FILES['userfile']['name'];//file upload name
-   $fileContents=$FILES['userfile']['type']; //variable for holding file upload contents
+
+   $docId = getDocumentNameById($docId);
+   $version = 1;
 
    if ($loanNumber == null){
       redirect("upload_new.php?error=MissingLoanNumbers");
@@ -102,16 +104,12 @@ if (isset($_POST['submit']) && $_POST['submit'] == 'submit') {
    }elseif ($fileMime != "application/pdf"){
       redirect("upload_new.php?error=FileMimeInvalid");
    }else{
-      echo '<h2>File Upload Data:</h2>';
-      echo '<h3>Document type: '.$docId.'</h3>';
-      echo '<h3>Loan Number:'. $loanNumber . '</h3>';
-      echo '<h3>File: '.$fileUpload.'</h3>';
-      echo '<h3>File mime: '.$fileMime.'</h3>';
+      $fileName = $loanNumber . '-' . $docId .'-'.$nowname . '.pdf';
 
-      $fp=fopen($fileContents,"r");
-      $contents=fread($fp,filesize($fileContents));
-      fclose($fp);
-
+      insertLoanID($loanNumber);
+      saveUploadedFile($fileName);
+      insertFileMetadata($fileName, $loanNumber, $docId, $version, $now);
+      redirect("upload_main.php?success=FileUploaded");
    }
 
 }
