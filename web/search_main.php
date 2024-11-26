@@ -30,10 +30,10 @@ if (isset($_GET['success'])){
 
 echo '<h1 class="page-head-line">Select the Search Criteria</h1>';
 echo '<div class="panel-body">';
-echo '<p><a class="btn btn-primary" href="upload_new.php">By Loan ID</a></p>';
+echo '<p><a class="btn btn-primary" href="search_loan.php">By Loan ID</a></p>';
 echo '<p><a class="btn btn-primary" href="search_docType.php">By Document Type</a></p>';
-echo '<p><a class="btn btn-primary" href="upload_existing.php">By Date</a></p>';
-echo '<p><a class="btn btn-primary" href="upload_existing.php">By Document Name</a></p>';
+echo '<p><a class="btn btn-primary" href="search_date.php">By Date</a></p>';
+echo '<p><a class="btn btn-primary" href="search_all.php">By All</a></p>';
 echo '</div>';
 echo '</div>';
 ?>

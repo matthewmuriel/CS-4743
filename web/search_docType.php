@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <meta charset="utf-8">
-<title>Search Main</title>
+<title>Search DocType</title>
 <!-- BOOTSTRAP STYLES-->
 <link href="assets/css/bootstrap.css" rel="stylesheet" />
 <!-- FONTAWESOME STYLES-->
@@ -20,22 +20,102 @@
 </head>
 <body>
 <?php
-echo '<div id ="page-inner">';
+include("../php/functions.php");
 
-if (isset($_GET['success'])){
-   if ($_GET['success']=="FileUploaded"){
-      echo '<div class="alert alert-success" role="alert">File Successfully Uploaded!</div>';
+if (!isset($_POST['submit'])){
+   echo '<div id ="page-inner">';
+   echo '<h1 class="page-head-line">Select the Search Criteria</h1>';
+   echo '<div class="panel-body">';
+   
+   echo '<form action="" method="post">';
+   
+   echo '<div class="form-group">';
+   echo '<label for="docType" class="control-label">Document Type</label>';
+   echo '<select class="form-control" name="docType">';
+   
+   $documents = fetchDocumentsFromDatabase();
+   
+   foreach ($documents as $document) {
+      echo '<option value="'.$document['document_id'].'">'.$document['document_name'].'</option>';
    }
+   echo '</select>';
+   echo '</div>';
+
+   echo '<div class="form-group">';
+   echo '<label for="loanNum" class="control-label">Loan Number</label>';
+   echo '<select class="form-control" name="loanNum">';
+   
+   $loanNumbers = fetchLoanIDsFromDatabase();
+   echo '<option value="'. -1 .'">'."Optional".'</option>';
+   foreach ($loanNumbers as $loanNumber){
+       echo '<option value="'.$loanNumber['loan_id'].'">'.$loanNumber['loan_number'].'</option>';
+   }
+   
+   echo '</select>';
+   echo '</div>';
+
+   echo '<hr>';
+   echo '<button type="submit" name="submit" value="submit" class="btn btn-lg btn-block btn-success">Search</button>';
+   echo '</form>';
+   echo '</div>';
+   echo '</div>';
 }
 
-echo '<h1 class="page-head-line">Select the Search Criteria</h1>';
-echo '<div class="panel-body">';
-echo '<p><a class="btn btn-primary" href="upload_new.php">By Loan ID</a></p>';
-echo '<p><a class="btn btn-primary" href="search_docType.php">By Document Type</a></p>';
-echo '<p><a class="btn btn-primary" href="upload_existing.php">By Date</a></p>';
-echo '<p><a class="btn btn-primary" href="upload_existing.php">By Document Name</a></p>';
-echo '</div>';
-echo '</div>';
+if (isset($_POST['submit']))
+{
+   $docTypeID = $_POST['docType'];
+   $docType = getDocumentNameById($docTypeID);
+   $loanId = null;
+
+   if ($_POST['loanNum'] != -1){
+      $loanId = $_POST['loanNum'];
+      $loanNumber = getLoanNumberById($loanId);
+   }
+
+   $pdo = db_connect('doc_storage');
+   $query = "SELECT file_name, loan_document_id FROM Loan_Document WHERE document_id = :document_id AND (:loan_id IS NULL OR loan_id = :loan_id)";
+   $stmt = $pdo->prepare($query);
+   $stmt->execute(['document_id' => $docTypeID, 'loan_id' => $loanId]);
+
+   $files = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+   echo '<div id ="page-inner">';
+   if ($loanId == null) {
+      echo '<h1 class="page-head-line">Results for document type: '.$docType.'</h1>';
+   }else{
+      echo '<h1 class="page-head-line">Results for document type: '.$docType." loan: ".$loanNumber.'</h1>';
+   }
+   echo '<div class="panel-body">';
+   
+   if ($files == null){
+      echo '<h2>No Files Found</h2>';
+   }else{
+      echo '<table class="table table-hover">';
+      echo '<thead>';
+      echo '<tr>';
+      echo '<th scope="col">'."ID".'</th>';
+      echo '<th scope="col">'."File Name".'</th>';
+      echo '</tr>';
+      echo '<tbody>';
+   
+      foreach ($files as $file){
+         echo '<tr>';
+         echo '<th scope="row">'.$file['loan_document_id'].'</th>';
+         echo '<td>';
+         echo '<a href="view_doc.php?docid='.$file['loan_document_id'].'" class="link-dark">'. $file['file_name'].'</a>';
+         echo '</td>';
+         echo '</tr>';
+      }
+   
+      echo '</tbody>';
+      echo '<table>';
+   }
+
+   echo '</div>';
+   echo '</div>';
+   echo '</div>';
+}
+
 ?>
 </body>
 </html>

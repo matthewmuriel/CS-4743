@@ -7,6 +7,8 @@ try {
     $apiLoanIDs = getAllLoanIds($sid);
     $dbLoanIDs = fetchLoanIDsFromDatabase();
 
+    
+
     $missingLoanIDs = array_diff($apiLoanIDs, $dbLoanIDs);
     if (count($missingLoanIDs) > 0) {
         logMessage(count($missingLoanIDs) . " missing loan IDs found", "INFO");

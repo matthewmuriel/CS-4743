@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <dwsync>
-<file name="functions.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133760984662365499" remote="133760985150000000" Dst="1" />
-<file name="clearSID.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133744297630000000" remote="133744333630000000" Dst="1" />
-<file name="createSID.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133745415890000000" remote="133745451890000000" Dst="1" />
-<file name="requestAllLoanID.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133747728569633658" remote="133749147390000000" Dst="1" />
-<file name="auditIds.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133752386142831041" remote="133752386350000000" Dst="1" />
-<file name="requestAllDocuments.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133747999631247002" remote="133749147390000000" Dst="1" />
-<file name="auditDocuments.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133752385934144148" remote="133752386340000000" Dst="1" />
-<file name="checkID.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133760908012303827" remote="133760908310000000" Dst="1" />
+<file name="functions.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133767030695401554" remote="133767031980000000" Dst="1" />
+<file name="auditIds.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133766894266501677" remote="133766894330000000" Dst="1" />
+<file name="auditDocuments.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133766887755650658" remote="133766887830000000" Dst="1" />
+<file name="checkID.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133764430311690638" remote="133764432360000000" Dst="1" />
 <file name="queryFileIds.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133752385852207846" remote="133752386350000000" Dst="1" />
-<file name="downloadFiles.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133752477705059144" remote="133752489120000000" Dst="1" />
+<file name="downloadFiles.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133766306470824610" remote="133766307290000000" Dst="1" />
+<file name="sanitize_files.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133764257620729726" remote="133764257830000000" Dst="1" />
+<file name="moveFiles.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133764438416180586" remote="133764438470000000" Dst="1" />
+<file name="fileSize.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133764477625087665" remote="133764477850000000" Dst="1" />
+<file name="updateLoanIDs.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133766918947570324" remote="133766918980000000" Dst="1" />
+<file name="fixFiles.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133766945401765830" remote="133766945430000000" Dst="1" />
+<file name="files_fix.txt" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133766315896040360" remote="133766942740000000" Dst="1" />
+<file name="clear_views.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133766981964857411" remote="133767031990000000" Dst="1" />
+<file name="validateFiles.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133770564592612597" remote="133770564720000000" Dst="1" />
 </dwsync>

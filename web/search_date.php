@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+<meta charset="utf-8">
+<title>Search Loan Number</title>
+<!-- BOOTSTRAP STYLES-->
+<link href="assets/css/bootstrap.css" rel="stylesheet" />
+<!-- FONTAWESOME STYLES-->
+<link href="assets/css/font-awesome.css" rel="stylesheet" />
+   <!--CUSTOM BASIC STYLES-->
+<link href="assets/css/basic.css" rel="stylesheet" />
+<!--CUSTOM MAIN STYLES-->
+<link href="assets/css/custom.css" rel="stylesheet" />
+<!-- PAGE LEVEL STYLES -->
+<link href="assets/css/bootstrap-fileupload.min.css" rel="stylesheet" />
+<!-- JQUERY SCRIPTS -->
+<script src="assets/js/jquery-1.10.2.js"></script>
+<!-- BOOTSTRAP SCRIPTS -->
+<script src="assets/js/bootstrap.js"></script>
+<script src="assets/js/bootstrap-fileupload.js"></script>
+</head>
+<body>
+<?php
+include("../php/functions.php");
+
+if (!isset($_POST['submit'])){
+   echo '<div id ="page-inner">';
+   echo '<h1 class="page-head-line">Select the Search Criteria</h1>';
+   echo '<div class="panel-body">';
+   
+   echo '<form action="" method="post">';
+
+   echo '<div class="form-group">';
+   echo '<label for="fromDate" class="control-label">Start Date</label>';
+   echo '<input type="date" name="fromDate" class="form-control" min="2024-10-31" max="2024-11-21">';
+   echo '</div>';
+
+   echo '<div class="form-group">';
+   echo '<label for="toDate" class="control-label">End Date (Optional)</label>';
+   echo '<input type="date" name="toDate" class="form-control" min="2024-10-31" max="2024-11-21">';
+   echo '</div>';
+
+   echo '<hr>';
+   echo '<button type="submit" name="submit" value="submit" class="btn btn-lg btn-block btn-success">Search</button>';
+   echo '</form>';
+   echo '</div>';
+   echo '</div>';
+}
+
+if (isset($_POST['submit']))
+{
+   $startDate = $_POST['fromDate'];
+   $endDate = null;
+
+   if (isset($_POST['toDate'])){
+      $endDate = $_POST['toDate'];
+   }
+
+   $pdo = db_connect('doc_storage');
+   
+   if ($endDate){
+      $query = "SELECT loan_document_id, file_name FROM Loan_Document WHERE DATE(submission_date) BETWEEN :startDate AND :endDate";
+      $stmt = $pdo->prepare($query);
+      $stmt->bindParam(':startDate', $startDate);
+      $stmt->bindParam(':endDate', $endDate);      
+   }else{
+      $query = "SELECT loan_document_id, file_name FROM Loan_Document WHERE DATE(submission_date) = :startDate";
+      $stmt = $pdo->prepare($query);
+      $stmt->bindParam(':startDate', $startDate);
+   }
+   $stmt->execute();
+
+   $files = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+   echo '<div id ="page-inner">';
+   
+   if($endDate){
+      echo '<h1 class="page-head-line">Results from: '.$startDate.' to '.$endDate.'</h1>';
+   }else{
+      echo '<h1 class="page-head-line">Results from: '.$startDate.'</h1>';
+   }
+
+
+   echo '<div class="panel-body">';
+   
+   if ($files == null){
+      echo '<h2>No Files Found</h2>';
+   }else{
+        echo '<table class="table table-hover">';
+        echo '<thead>';
+        echo '<tr>';
+        echo '<th scope="col">'."ID".'</th>';
+        echo '<th scope="col">'."File Name".'</th>';
+        echo '</tr>';
+        echo '<tbody>';
+    
+        foreach ($files as $file){
+            echo '<tr>';
+            echo '<th scope="row">'.$file['loan_document_id'].'</th>';
+            echo '<td>';
+            echo '<a href="view_doc.php?docid='.$file['loan_document_id'].'" class="link-dark">'. $file['file_name'].'</a>';
+            echo '</td>';
+            echo '</tr>';
+        }
+    
+        echo '</tbody>';
+        echo '<table>';
+   }
+
+   echo '</div>';
+   echo '</div>';
+   echo '</div>';
+}
+
+?>
+</body>
+</html>

@@ -53,6 +53,42 @@ function fetchLoanIDsFromDatabase(){
     }
 }
 
+function fetchLoanID($loanNumber){
+    try {
+        $pdo = db_connect('doc_storage');
+        $sql = "SELECT loan_id FROM Loan WHERE loan_number = :loan_number";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':loan_number', $loanNumber, PDO::PARAM_STR);
+        $stmt->execute();
+
+        $loanId = $stmt->fetchColumn();
+
+        return $loanId !== false ? $loanId : null;
+
+    }catch (PDOException $e) {
+        error_log("Error fetching loan id from database: " . $e->getMessage());
+        return null;
+    }
+}
+
+function fetchDocumentID($documentType){
+    try {
+        $pdo = db_connect('doc_storage');
+        $sql = "SELECT document_id FROM Document WHERE document_name = :document_type";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':document_type', $documentType, PDO::PARAM_STR);
+        $stmt->execute();
+
+        $documentID = $stmt->fetchColumn();
+
+        return $documentID !== false ? $documentID : null;
+
+    }catch (PDOException $e) {
+        error_log("Error fetching loan id from database: " . $e->getMessage());
+        return null;
+    }    
+}
+
 function fetchDocumentsFromDatabase(){
     try {
         $pdo = db_connect('doc_storage');
@@ -64,18 +100,6 @@ function fetchDocumentsFromDatabase(){
         error_log("Error fetching loan ids from database: " . $e->getMessage());
         return null;
     }    
-}
-
-function fetchPendingDocuments(){
-    try{
-        $pdo = db_connect('file_metadata');
-        $stmt = $pdo->query('Select file_id from file_imports where status = "Pending"');
-        $documents = $stmt->fetchAll(PDO::FETCH_COLUMN);
-        return $documents;
-    } catch (PDOException $e) {
-        error_log("Error fetching pending documents from database: " . $e->getMessage());
-        return null;
-    }
 }
 
 /**
@@ -118,6 +142,21 @@ function insertLoanID($loanID){
     }
 }
 
+function insertDocumentID($documentID){
+    try{
+        $pdo = db_connect('doc_storage');
+        $sql = "INSERT INTO Document (document_name) VALUES (:documentID)";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':documentID', $documentID, PDO::PARAM_STR);
+        $stmt->execute();
+
+        logMessage("Inserted loan id $documentID into database.", "INFO");
+    }catch (PDOException $e) {
+        logMessage("Error inserting {$documentID} into database: " . $e->getMessage(), "ERROR");
+        error_log("Error inserting document id into database: " . $e->getMessage());    
+    }
+}
 
 function insertImportData($fileName, $fileParts){
     try{
@@ -136,6 +175,28 @@ function insertImportData($fileName, $fileParts){
     } catch (PDOException $e) {
         error_log("Error inserting import data into database: " . $e->getMessage());
         logMessage("Error inserting import data into database: " . $e->getMessage(), "ERROR");
+    }
+}
+
+function insertDocumentData($loan_id, $document_id, $file_name, $submission_date, $file_path, $version_number, $insertion){
+    try{
+        $pdo = db_connect("doc_storage");
+        $sql = "INSERT INTO Loan_Document (loan_id, document_id, file_name, submission_date, file_path, version_number, insertion_method) VALUES (:loan_id, :document_id, :file_name, :submission_date, :file_path, :version_number, :insertion_method)";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':loan_id', $loan_id, PDO::PARAM_INT);
+        $stmt->bindParam(':document_id', $document_id, PDO::PARAM_INT); 
+        $stmt->bindParam(':file_name', $file_name, PDO::PARAM_STR); 
+        $stmt->bindParam(':submission_date', $submission_date, PDO::PARAM_STR); 
+        $stmt->bindParam(':file_path', $file_path, PDO::PARAM_STR); 
+        $stmt->bindParam(':version_number', $version_number, PDO::PARAM_STR); 
+        $stmt->bindParam(':insertion_method', $insertion, PDO::PARAM_STR);
+        $stmt->execute();         
+
+        logMessage('Inserted document data for ' . $file_name . ' into document storage.', "INFO");
+    } catch (PDOException $e) {
+        error_log("Error inserting document data into database: " . $e->getMessage());
+        logMessage("Error inserting document data into database: " . $e->getMessage(), "ERROR");
     }
 }
 
@@ -221,6 +282,12 @@ function breakDownFileName($fileName){
     $tmp = explode(".", $parts[2]);
     $timestamp = DateTime::createFromFormat('Ymd_H_i_s', $tmp[0])->format('Y-m-d H:i:s');
 
+    if ($documentName === "Tax"){
+        $documentName = "Tax Returns";
+    }elseif ($documentName === "Tax_Returns"){
+        $documentName = "Tax Returns";
+    }
+
     return [$loanID, $documentName, $version, $timestamp];
 }
 
@@ -238,6 +305,22 @@ function updateFileStatus($fileName, $status){
         error_log("Error updating file status: " . $e->getMessage());
         logMessage("Error updating file status: " . $e->getMessage(), "ERROR");
     }
+}
+
+function updateFileSize($fileName, $file_size){
+    try{
+        $pdo = db_connect("file_metadata");
+        $sql = "UPDATE file_imports SET file_size = :file_size WHERE file_id = :file_id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':file_size', $file_size, PDO::PARAM_STR);
+        $stmt->bindParam(':file_id', $fileName, PDO::PARAM_STR);
+        $stmt->execute();
+
+        logMessage("Updated file size for $fileName to $file_size", "INFO");
+    }catch (PDOException $e){
+        error_log("Error updating file status: " . $e->getMessage());
+        logMessage("Error updating file status: " . $e->getMessage(), "ERROR");
+    }  
 }
 
 function getFileData($fileName, $sid){
@@ -594,6 +677,118 @@ function insertFileMetadata($fileName, $loanNumber, $docType, $version, $now, $s
     } catch (PDOException $e) {
         error_log("Error inserting import data into database: " . $e->getMessage());
         logMessage("Error inserting import data into database: " . $e->getMessage(), "ERROR");        
+    }
+}
+
+function getFileIds($status){
+    try{
+        $pdo = db_connect("file_metadata");
+        $stmt = $pdo->prepare("SELECT file_id FROM file_imports WHERE status = :status");
+        $stmt->execute(['status' => $status]);
+
+        $fileIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        return $fileIds;
+    }catch (PDOException $e) {
+        error_log('ERROR Getting files from database'. $e->getMessage());
+        logMessage('ERROR Getting files from database'. $e->getMessage(), 'ERROR');
+    }
+}
+
+function getSanitizedFiles(){
+    try{
+        $pdo = db_connect('file_metadata');
+        $sql = "SELECT * FROM file_imports WHERE status = :status";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':status', 'Sanitized', PDO::PARAM_STR);
+        $stmt->execute();
+        $files = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $files;
+    }catch (PDOException $e) {
+        error_log('ERROR Getting files from database'. $e->getMessage());
+        logMessage('ERROR Getting files from database'. $e->getMessage(), 'ERROR');  
+    }
+}
+
+function sanitizeFile($filePath) {
+    if (!file_exists($filePath)) {
+        logMessage("File does not exist: $filePath", "ERROR");
+        return false;
+    }
+
+    if (!is_readable($filePath)) {
+        logMessage("File is not readable: $filePath", "ERROR");
+        return false;
+    }
+
+    if (filesize($filePath) === 0){
+        logMessage("File is empty: $filePath", "ERROR");
+        return false;
+    }
+
+    $mimeType = mime_content_type($filePath);
+    if ($mimeType !== 'application/pdf'){
+        logMessage("Invalid MIME type for file: $filePath. Detcted MIME: $mimeType", "ERROR");
+        return false;
+    }
+
+    $fp = fopen($filePath, 'r');
+    $header = fread($fp, 4);
+    fclose($fp);
+
+    if ($header !== "%PDF"){
+        logMessage("File is not a valid PDF structure: $filePath", "ERROR");
+        return false;
+    }
+
+    return true;
+}
+
+function updateLastAccess($loanDocumentId){
+    try {
+        $pdo = db_connect('doc_storage');
+        $query = "UPDATE Loan_Document SET last_access = NOW() WHERE loan_document_id = :loanDocumentID";
+        $stmt = $pdo->prepare($query);
+        $stmt->bindParam(':loanDocumentID', $loanDocumentId, PDO::PARAM_INT);
+        $stmt->execute();
+    } catch (PDOException $e) {
+        error_log("Error updating last_access: " . $e->getMessage());
+        logMessage("Failed to update last_access for loan_document_id: $loanDocumentId", "ERORR");
+    }
+}
+
+function makeFileAccessible($filePath, $fileName){
+    $destinationPath = "/var/www/html/views/$fileName";
+
+    if (copy($filePath, $destinationPath)) {
+        return "/views/$fileName";
+    } else {
+        throw new Exception("Failed to make the file accessible.");
+    }
+
+}
+
+function validateFiles($sid, $lid){
+    $data = "uid=". S_USERNAME . "&sid=" . $sid . "&lid=".$lid;
+    $response = sendCurlRequest(ApiEndpoint::REQUEST_FILE_BY_LOAN, $data);
+
+    if ($response["status"] === "error") {
+        error_log($response["message"]);
+        throw new Exception($response["message"]);
+    }
+
+    $cinfo = json_decode($response["result"], true);
+    if ($cinfo[0] == "Status: OK") {
+        $tmp = explode(":", $cinfo[1]);
+        $payLoad = json_decode($tmp[1]);
+
+        if ($payLoad == null){
+            return null;
+        }
+
+        return $payLoad;
+    } else {
+        error_log("Failed to query files: $cinfo[1]");
+        throw new Exception("Failed to query files: $cinfo[1]");
     }
 }
 

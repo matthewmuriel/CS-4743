@@ -3,4 +3,10 @@
 <file name="upload_main.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133760971765957262" remote="133760972030000000" Dst="1" />
 <file name="upload_new.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133761058004360495" remote="133761058580000000" Dst="1" />
 <file name="upload_existing.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133761056750588541" remote="133761056960000000" Dst="1" />
+<file name="search_docType.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133764535491147258" remote="133764535510000000" Dst="1" />
+<file name="search_main.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133764568747885018" remote="133764568920000000" Dst="1" />
+<file name="search_loan.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133764535970025173" remote="133764536030000000" Dst="1" />
+<file name="view_doc.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133766967896385747" remote="133766967930000000" Dst="1" />
+<file name="search_all.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133764563923944397" remote="133764563950000000" Dst="1" />
+<file name="search_date.php" server="ec2-3-85-164-111.compute-1.amazonaws.com//var/www/html/" local="133766380178453299" remote="133766380190000000" Dst="1" />
 </dwsync>

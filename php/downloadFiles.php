@@ -8,7 +8,7 @@ try{
     $begin = microtime(true);
 
     logMessage("Starting downloadFiles.php", "INFO");
-    $pendingFiles = fetchPendingDocuments();
+    $pendingFiles = getFileIds("Pending");
     $sid = createSession();
 
     if(count($pendingFiles) > 0){
@@ -24,6 +24,7 @@ try{
             try{
                 $data = getFileData($fileName, $sid);
                 file_put_contents("/var/private_files/files/temp/".$fileName, $data);
+                $fileSize=filesize("/var/private_files/files/temp/".$fileName);
                 updateFileStatus($fileName, "Downloaded");
                 $count++;
             }catch(Exception $e){

@@ -9,6 +9,8 @@ try{
     $sid = createSession();
     $apiDocuments = getAllDocuments($sid);
     $dbDocuments =  fetchAllDocuments();
+    $totalDocuments = count($apiDocuments);
+    echo "Total Documents: ". $totalDocuments ."";
 
     $missingDocuments = array_diff($apiDocuments, $dbDocuments);
 
