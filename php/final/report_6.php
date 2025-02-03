@@ -2,6 +2,8 @@
 include("../functions.php");
 
 $pdo = db_connect('doc_storage');
+
+//Lists the total number of each document type received
 $query = "SELECT d.document_name, ld.document_id, COUNT(*) AS total_count
 FROM Loan_Document ld
 JOIN Document d ON ld.document_id = d.document_id

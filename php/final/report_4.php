@@ -3,6 +3,7 @@ include("../functions.php");
 
 $pdo = db_connect('doc_storage');
 
+//Calculates the average file size of documents in the time frame
 $query = "SELECT AVG(file_size) AS average_file_size 
 FROM Loan_Document 
 WHERE submission_date >= '2024-11-01 00:00:00' 
@@ -13,6 +14,8 @@ $stmt->execute();
 $results = $stmt->fetch();
 $globalAvgSize = $results[0];
 
+//Calculates the average number of documents per loan
+//Utilizes a subquery to count the number of documents associated with each loan
 $query = "SELECT AVG(document_count) AS average_documents_per_loan
 FROM (
     SELECT loan_id, COUNT(*) AS document_count
@@ -26,6 +29,8 @@ $stmt->execute();
 $results = $stmt->fetch();
 $globalAvgFiles = $results[0];
 
+//Selects the loan details to get the total documents and average file size
+//Performs a Left Join with the Loan_Document table to include all loans,  
 $query = "SELECT l.loan_id, l.loan_number, COUNT(ld.document_id) AS total_documents,
 AVG(ld.file_size) AS average_file_size
 FROM Loan l

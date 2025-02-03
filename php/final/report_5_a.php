@@ -2,9 +2,23 @@
 include("../functions.php");
 
 $pdo = db_connect('doc_storage');
+
+//Retrieve loan numbers along with the names of missing documents
+//Uses the query from report 1 to get the list of valid loan numbers
+//Cross joins to match every loan from the fl list with every document from the Document table
+//This ensures that for each laon, all possible document types are considered.
+//We then use a left join to check which document types are missing for each laon.
 $query = "SELECT l.loan_number, GROUP_CONCAT(d.document_name) AS missing_documents
-FROM Loan l
+FROM (
+    SELECT DISTINCT l.loan_number, l.loan_id
+    FROM Loan l
+    JOIN Loan_Document ld 
+    ON l.loan_id = ld.loan_id 
+    WHERE ld.submission_date BETWEEN '2024-11-01 00:00:00' AND '2024-11-20 23:59:59'
+) fl
 CROSS JOIN Document d
+LEFT JOIN Loan l 
+ON l.loan_id = fl.loan_id
 LEFT JOIN Loan_Document ld 
 ON l.loan_id = ld.loan_id 
 AND d.document_id = ld.document_id 
